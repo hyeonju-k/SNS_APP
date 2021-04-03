@@ -20,6 +20,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
 import com.example.community.MemberInfo;
 import com.example.community.R;
 import com.example.community.activity.CameraActivity;
@@ -74,9 +75,11 @@ public class MemberInitActivity extends AppCompatActivity {
             case 0: {
                 if (resultCode == Activity.RESULT_OK) {
                     profilePath = data.getStringExtra("profilePath");
-                    Log.e("로그", "profilePath" + profilePath);
+                   /*
                     Bitmap bmp = BitmapFactory.decodeFile(profilePath);
                     profileImageView.setImageBitmap(bmp);
+                    */
+                    Glide.with(this).load(profilePath).centerCrop().override(500).into(profileImageView);
                 }
                 break;
             }
@@ -107,7 +110,6 @@ public class MemberInitActivity extends AppCompatActivity {
                     myStartActivity(CameraActivity.class);
                     break;
                 case R.id.gallery:
-
                     if(ContextCompat.checkSelfPermission(MemberInitActivity.this,
                             Manifest.permission.READ_EXTERNAL_STORAGE)
                             != PackageManager.PERMISSION_GRANTED){
