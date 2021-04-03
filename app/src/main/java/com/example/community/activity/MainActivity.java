@@ -1,6 +1,8 @@
 package com.example.community.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,22 +20,22 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
 
+    @SuppressLint("SourceLockedOrientationActivity")        // for SCREEN_ORIENTATION_PORTRAIT
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // 가로모드 off
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if(user == null){
             myStartActivity(LoginActivity.class);
         }else{
-            myStartActivity(MemberInitActivity.class);
-            //myStartActivity(CameraActivity.class);
-
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             DocumentReference docRef = db.collection("users").document(user.getUid());
             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -56,7 +58,10 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+
+
         findViewById(R.id.logoutButton).setOnClickListener(onClickListener);
+        findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
     }
 
     @Override
@@ -75,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.logoutButton:
                     FirebaseAuth.getInstance().signOut();
                     myStartActivity(SignUpActivity.class);
+                    break;
+                case R.id.floatingActionButton:
+                    myStartActivity(WritePostActivity.class);
                     break;
             }
         }

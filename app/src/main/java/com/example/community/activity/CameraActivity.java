@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @RequiresApi(api = Build.VERSION_CODES.Q)
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends BasicActivity {
     private Camera2BasicFragment camera2BasicFragment;
 
     /**
