@@ -109,6 +109,7 @@
                 android:background="@drawable/btn_shape"
                 android:backgroundTint="#A376F3"
                 android:text="사진 촬영"
+                android:layout_margin="7dp"
                 android:textStyle="bold" />
 
             <Button
@@ -119,6 +120,7 @@
                 android:background="@drawable/btn_shape"
                 android:backgroundTint="#A376F3"
                 android:text="갤러리"
+                android:layout_margin="7dp"
                 android:textStyle="bold" />
         </LinearLayout>
 
