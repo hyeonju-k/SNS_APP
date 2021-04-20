@@ -18,13 +18,9 @@ import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.example.community.R;
-import com.example.community.view.MemberInfo;
-import com.example.community.view.WriteInfo;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.example.community.view.PostInfo;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -48,6 +44,7 @@ public class WritePostActivity extends BasicActivity {
     private ArrayList<String> pathList = new ArrayList<>();
     private LinearLayout parent;
     private RelativeLayout buttonsBackgroundLayout;
+    private RelativeLayout loaderLayout;
     private ImageView selectedImageView;
     private EditText selectedEditText;
     private int pathCount, successCount;
@@ -59,6 +56,8 @@ public class WritePostActivity extends BasicActivity {
 
         buttonsBackgroundLayout = findViewById(R.id.buttonsBackgroundLayout);
         parent = findViewById(R.id.contentsLayout);
+
+        loaderLayout = findViewById(R.id.loaderLayout);
 
         buttonsBackgroundLayout.setOnClickListener(onClickListener);
         findViewById(R.id.check).setOnClickListener(onClickListener);
@@ -181,6 +180,7 @@ public class WritePostActivity extends BasicActivity {
         final String title = ((EditText) findViewById(R.id.titleEditText)).getText().toString();
 
         if (title.length() > 0) {
+            loaderLayout.setVisibility(View.VISIBLE);
             final ArrayList<String> contentsList = new ArrayList<>();
 
             user = FirebaseAuth.getInstance().getCurrentUser();
@@ -229,8 +229,8 @@ public class WritePostActivity extends BasicActivity {
                                             successCount++;
                                             if(pathList.size() == successCount){
                                                 // 완료
-                                                WriteInfo writeInfo= new WriteInfo(title, contentsList, user.getUid(), new Date());
-                                                storeUploader(documentReference , writeInfo);
+                                                PostInfo postInfo = new PostInfo(title, contentsList, user.getUid(), new Date());
+                                                storeUploader(documentReference , postInfo);
                                             }
                                         }
                                     });
@@ -245,7 +245,10 @@ public class WritePostActivity extends BasicActivity {
                         pathCount++;
                     }
                 }
-
+            }
+            if(pathList.size() ==0){           // 첨부파일이 없을 경우에도 저장
+                PostInfo postInfo = new PostInfo(title, contentsList, user.getUid(), new Date());
+                storeUploader(documentReference , postInfo);
             }
         }
         else {
@@ -253,18 +256,22 @@ public class WritePostActivity extends BasicActivity {
         }
     };
 
-    private void storeUploader(DocumentReference documentReference, WriteInfo writeInfo){
 
-        documentReference.set(writeInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+
+    private void storeUploader(DocumentReference documentReference, PostInfo postInfo){
+
+        documentReference.set(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.e(TAG, "DocumentSnapshot successfully written!");
+                loaderLayout.setVisibility(View.GONE);
                 finish();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.w(TAG, "Error writing document", e);
+                loaderLayout.setVisibility(View.GONE);
             }
         });
 

@@ -1,14 +1,18 @@
 package com.example.community.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.View;
+import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,17 +22,65 @@ import com.example.community.adapter.GalleryAdapter;
 import java.util.ArrayList;
 
 public class GalleryActivity extends BasicActivity {
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
 
+        if(ContextCompat.checkSelfPermission(GalleryActivity.this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(GalleryActivity.this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    1);
+            // Should we show an explanation?
+            if(ActivityCompat.shouldShowRequestPermissionRationale(GalleryActivity.this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)){
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            }else{
+                // No explanation needed, we can request the permission.
+
+                // MY_PERMISSIONS_REQUEST_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+                startToast("권한을 허용해 주세요");
+            }
+        }else{
+           recyclerInit();
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permission[], @NonNull int[] grantResults){
+        switch(requestCode){
+            case 1: {
+                // if request is cancelled, the result arrays are empty.
+                if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    recyclerInit();
+
+                }else{
+                    finish();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    startToast("권한을 허용해 주세요");
+                }
+            }
+        }
+    }
+
+    private void recyclerInit(){
         final int numberOfColumns = 3;
 
-        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -38,7 +90,7 @@ public class GalleryActivity extends BasicActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
 
         // specify an adapter (see also next example)
-        mAdapter = new GalleryAdapter(this, getImagesPath(this));
+        RecyclerView.Adapter mAdapter = new GalleryAdapter(this, getImagesPath(this));
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -71,4 +123,9 @@ public class GalleryActivity extends BasicActivity {
         }
         return listOfAllImages;
     }
+
+    private void startToast(String msg){
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
 }

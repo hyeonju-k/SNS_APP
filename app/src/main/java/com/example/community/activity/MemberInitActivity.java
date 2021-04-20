@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,6 +43,7 @@ public class MemberInitActivity extends BasicActivity {
 
     private static final String TAG = "MemberInitActivity";
     private ImageView profileImageView;
+    private RelativeLayout loaderLayout;
     private String profilePath;
     private FirebaseUser user;
 
@@ -52,6 +54,7 @@ public class MemberInitActivity extends BasicActivity {
 
         profileImageView = findViewById(R.id.profileImageView);
         profileImageView.setOnClickListener(onClickListener);
+        loaderLayout = findViewById(R.id.loaderLayout);
 
         findViewById(R.id.checkButton).setOnClickListener(onClickListener);
         findViewById(R.id.picture).setOnClickListener(onClickListener);
@@ -88,7 +91,7 @@ public class MemberInitActivity extends BasicActivity {
             switch (v.getId()) {
                 case R.id.checkButton:
                     try {
-                        profileUpdate();
+                        storageUploader();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
@@ -105,7 +108,7 @@ public class MemberInitActivity extends BasicActivity {
                 case R.id.picture:
                     myStartActivity(CameraActivity.class);
                     break;
-                case R.id.gallery:
+                case R.id.gallery:          // Permission 관련
                     if(ContextCompat.checkSelfPermission(MemberInitActivity.this,
                             Manifest.permission.READ_EXTERNAL_STORAGE)
                             != PackageManager.PERMISSION_GRANTED){
@@ -156,7 +159,7 @@ public class MemberInitActivity extends BasicActivity {
         }
     }
 
-    private void profileUpdate() throws FileNotFoundException {
+    private void storageUploader() throws FileNotFoundException {
 
         final String name = ((EditText) findViewById(R.id.nameEditText)).getText().toString();
         final String phoneNum = ((EditText) findViewById(R.id.phoneNumEditText)).getText().toString();
@@ -164,6 +167,7 @@ public class MemberInitActivity extends BasicActivity {
         final String address = ((EditText) findViewById(R.id.addressEditText)).getText().toString();
 
         if (name.length() > 0 && phoneNum.length() > 9 && birthDay.length() > 5 && address.length() > 0) {
+            loaderLayout.setVisibility(View.VISIBLE);
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
             user = FirebaseAuth.getInstance().getCurrentUser();
@@ -171,7 +175,7 @@ public class MemberInitActivity extends BasicActivity {
 
             if(profilePath == null){
                 MemberInfo memberInfo = new MemberInfo(name, phoneNum, birthDay, address);
-                uploader(memberInfo);
+                storeUploader(memberInfo);
             }else{
                 try {
                     InputStream stream = new FileInputStream(new File(profilePath));
@@ -192,7 +196,7 @@ public class MemberInitActivity extends BasicActivity {
                                 Log.e("성공", "성공: " + downloadUri);
 
                                 MemberInfo memberInfo = new MemberInfo(name, phoneNum, birthDay, address, downloadUri.toString());
-                                uploader(memberInfo);
+                                storeUploader(memberInfo);
                             } else {
                                 // Handle failures
                                 // ...
@@ -211,7 +215,7 @@ public class MemberInitActivity extends BasicActivity {
         }
     }
 
-    private void uploader(MemberInfo memberInfo){
+    private void storeUploader(MemberInfo memberInfo){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("users").document(user.getUid()).set(memberInfo)
@@ -219,6 +223,7 @@ public class MemberInitActivity extends BasicActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         startToast("회원정보 등록을 성공하였습니다.");
+                        loaderLayout.setVisibility(View.GONE);
                         finish();
                     }
                 })
@@ -227,6 +232,7 @@ public class MemberInitActivity extends BasicActivity {
                     public void onFailure(@NonNull Exception e) {
                         startToast("회원정보 등록에 실패하였습니다.");
                         Log.w(TAG, "Error writing document", e);
+                        loaderLayout.setVisibility(View.GONE);
                     }
                 });
     }
