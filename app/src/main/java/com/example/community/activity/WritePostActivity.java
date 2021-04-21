@@ -204,7 +204,10 @@ public class WritePostActivity extends BasicActivity {
                         contentsList.add(pathList.get(pathCount));
 
                         // storage 경로
-                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/"+ pathCount+".jpg");
+
+                        // 파일 확장자
+                        String[] pathArray = pathList.get(pathCount).split("\\.");
+                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/"+ pathCount+"."+ pathArray[pathArray.length-1]);
 
                         try {
                             InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));

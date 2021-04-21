@@ -109,55 +109,11 @@ public class MemberInitActivity extends BasicActivity {
                     myStartActivity(CameraActivity.class);
                     break;
                 case R.id.gallery:          // Permission 관련
-                    if(ContextCompat.checkSelfPermission(MemberInitActivity.this,
-                            Manifest.permission.READ_EXTERNAL_STORAGE)
-                            != PackageManager.PERMISSION_GRANTED){
-                        ActivityCompat.requestPermissions(MemberInitActivity.this,
-                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                                1);
-                        // Should we show an explanation?
-                        if(ActivityCompat.shouldShowRequestPermissionRationale(MemberInitActivity.this,
-                                Manifest.permission.READ_EXTERNAL_STORAGE)){
-                            // Show an explanation to the user *asynchronously* -- don't block
-                            // this thread waiting for the user's response! After the user
-                            // sees the explanation, try again to request the permission.
-
-                        }else{
-                            // No explanation needed, we can request the permission.
-
-                            // MY_PERMISSIONS_REQUEST_CONTACTS is an
-                            // app-defined int constant. The callback method gets the
-                            // result of the request.
-                            startToast("권한을 허용해 주세요");
-                        }
-                    }else{
-                        myStartActivity(GalleryActivity.class);
-                    }
+                    myStartActivity(GalleryActivity.class);
                     break;
             }
         }
     };
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                          String permission[], int[] grantResults){
-        switch(requestCode){
-            case 1: {
-                // if request is cancelled, the result arrays are empty.
-                if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    myStartActivity(GalleryActivity.class);
-
-                }else{
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    startToast("권한을 허용해 주세요");
-                }
-            }
-        }
-    }
 
     private void storageUploader() throws FileNotFoundException {
 
