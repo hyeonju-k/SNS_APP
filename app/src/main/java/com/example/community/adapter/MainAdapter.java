@@ -35,10 +35,35 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GalleryViewHol
     // you provide access to all the views for a data item in a view holder
     static class GalleryViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-         CardView cardView;
-         GalleryViewHolder(CardView v){
+        CardView cardView;
+
+        GalleryViewHolder(Activity activity, CardView v, PostInfo postInfo) {
             super(v);
             cardView = v;
+
+            // Contents
+            LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
+            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            ArrayList<String> contentsList = postInfo.getContents();
+
+            if(contentsLayout.getChildCount()==0){
+                for (int i = 0; i < contentsList.size(); i++) {
+                String contents = contentsList.get(i);
+
+                    if (Patterns.WEB_URL.matcher(contents).matches()) {        // URL - image or video
+                    // 이미지
+                    ImageView imageView = new ImageView(activity);
+                    imageView.setLayoutParams(layoutParams);
+                    imageView.setAdjustViewBounds(true);
+                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                    contentsLayout.addView(imageView);
+                    } else {          // text
+                    TextView textView = new TextView(activity);
+                    textView.setLayoutParams(layoutParams);
+                    contentsLayout.addView(textView);
+                    }
+                }
+            }
         }
     }
 
@@ -48,6 +73,11 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GalleryViewHol
         mDataset = myDataset;
     }
 
+    @Override
+    public int getItemViewType(int position){
+        return position;
+    }
+
     // Create new views (invoked by the layout manager)
     @NonNull
     @Override
@@ -55,7 +85,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GalleryViewHol
         // create a new view
         CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false);
 
-        final GalleryViewHolder galleryViewHolder = new GalleryViewHolder(cardView);
+        final GalleryViewHolder galleryViewHolder = new GalleryViewHolder(activity, cardView, mDataset.get(viewType));
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,7 +97,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GalleryViewHol
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(@NonNull final GalleryViewHolder holder, int position){
+    public void onBindViewHolder(@NonNull final GalleryViewHolder holder, int position) {
 
 
         CardView cardView = holder.cardView;
@@ -83,27 +113,18 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GalleryViewHol
 
         // contents
         LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         ArrayList<String> contentsList = mDataset.get(position).getContents();
 
-        if(contentsLayout.getChildCount() == 0){
-            for(int i=0 ; i<contentsList.size() ; i++){
-                String contents = contentsList.get(i);
-                if(Patterns.WEB_URL.matcher(contents).matches()) {        // URL 검사
-                    // 이미지
-                    ImageView imageView = new ImageView(activity);
-                    imageView.setLayoutParams(layoutParams);
-                    contentsLayout.addView(imageView);
-                    Glide.with(activity).load(contents).override(1000).into(imageView);
-                }else{          // 텍스트
-                    TextView textView = new TextView(activity);
-                    textView.setLayoutParams(layoutParams);
-                    textView.setText(contents);
-                    contentsLayout.addView(textView);
-                }
+
+        for (int i = 0; i < contentsList.size(); i++) {
+            String contents = contentsList.get(i);
+            if (Patterns.WEB_URL.matcher(contents).matches()) {        // URL 검사
+                // 이미지
+                Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into((ImageView)contentsLayout.getChildAt(i));
+            } else {          // 텍스트
+                ((TextView)contentsLayout.getChildAt(i)).setText(contents);
             }
         }
-
 
 
         // - get element from your dataset at this position
@@ -114,7 +135,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GalleryViewHol
         imageView.setImageBitmap(bmp);
         */
         // RESIZING
-
     }
 
     // Return the size of your dataset (invoked by the layout manager)

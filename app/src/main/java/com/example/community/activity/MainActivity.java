@@ -83,6 +83,7 @@ public class MainActivity extends BasicActivity {
         findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
     }
 
+    @Override
     protected void onResume(){
         super.onResume();
 
