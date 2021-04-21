@@ -19,9 +19,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -30,6 +32,9 @@ import java.util.Date;
 
 public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
+    private FirebaseUser firebaseUser;
+    private FirebaseFirestore firebaseFirestore;
+    private RecyclerView recyclerView;
 
     @SuppressLint("SourceLockedOrientationActivity")        // for SCREEN_ORIENTATION_PORTRAIT
     @Override
@@ -39,14 +44,14 @@ public class MainActivity extends BasicActivity {
         // 가로모드 off
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        if (user == null) {
+        if (firebaseUser == null) {
             myStartActivity(LoginActivity.class);
         } else {
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            DocumentReference docRef = db.collection("users").document(user.getUid());
-            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            firebaseFirestore = FirebaseFirestore.getInstance();
+            DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseUser.getUid());
+            documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
@@ -64,16 +69,33 @@ public class MainActivity extends BasicActivity {
                     }
                 }
             });
+        }
+        //findViewById(R.id.logoutButton).setOnClickListener(onClickListener);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
-            // 로그인이 되었을 때 게시글 목록
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        recyclerView.setHasFixedSize(true);
 
-            db.collection("posts")
-                    .get()
+        //https://stackoverflow.com/questions/40587168/simple-android-grid-example-using-recyclerview-with-gridlayoutmanager-like-the
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+        findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
+    }
+
+    protected void onResume(){
+        super.onResume();
+
+
+        if (firebaseUser != null) {
+            CollectionReference collectionReference = firebaseFirestore.collection("posts");
+            // 게시글 최근순 정렬
+            collectionReference.orderBy("createdAt" , Query.Direction.DESCENDING).get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
-                                 ArrayList<PostInfo> postList = new ArrayList<>();
+                                ArrayList<PostInfo> postList = new ArrayList<>();
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Log.d(TAG, document.getId() + " => " + document.getData());
                                     postList.add(new PostInfo(
@@ -83,16 +105,6 @@ public class MainActivity extends BasicActivity {
                                             new Date(document.getDate("createdAt").getTime())
                                     ));
                                 }
-
-
-                                RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-
-                                // use this setting to improve performance if you know that changes
-                                // in content do not change the layout size of the RecyclerView
-                                recyclerView.setHasFixedSize(true);
-
-                                //https://stackoverflow.com/questions/40587168/simple-android-grid-example-using-recyclerview-with-gridlayoutmanager-like-the
-                                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
                                 // specify an adapter (see also next example)
                                 RecyclerView.Adapter mAdapter = new MainAdapter(MainActivity.this, postList);
@@ -104,12 +116,10 @@ public class MainActivity extends BasicActivity {
                             }
                         }
                     });
-
         }
-
-        //findViewById(R.id.logoutButton).setOnClickListener(onClickListener);
-        findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
     }
+
+
 
     @Override
     public void onBackPressed() {
