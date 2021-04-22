@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.example.community.R;
-import com.example.community.view.PostInfo;
+import com.example.community.PostInfo;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;

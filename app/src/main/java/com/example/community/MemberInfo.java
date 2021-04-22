@@ -1,4 +1,4 @@
-package com.example.community.view;
+package com.example.community;
 
 public class MemberInfo {
 
