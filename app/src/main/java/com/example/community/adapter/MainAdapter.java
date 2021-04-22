@@ -114,7 +114,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         ArrayList<String> contentsList = mDataset.get(position).getContents();
 
         if(contentsLayout.getTag() == null || !contentsLayout.getTag().equals(contentsList)){
-            Log.e("로그", "태그");
             contentsLayout.setTag(contentsList);
             contentsLayout.removeAllViews();
             if(contentsList.size() > 0){
@@ -163,7 +162,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
                 String id = mDataset.get(position).getId();
                 switch(menuItem.getItemId()){
                     case R.id.modify :
-                        //onPostListener.onModify();
+                        onPostListener.onModify(id);
                         return true;
                     case R.id.delete :
                         onPostListener.onDelete(id);

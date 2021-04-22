@@ -136,12 +136,11 @@ public class MainActivity extends BasicActivity {
                         //Log.w(TAG, "Error deleting document", e);
                     }
             });
-            Log.e("로그", "삭제: " + id);
         }
 
         @Override
         public void onModify(String id) {
-            Log.e("로그", "수정: "+ id);
+            myStartActivity(WritePostActivity.class, id);
         }
     };
 
@@ -197,10 +196,12 @@ public class MainActivity extends BasicActivity {
         startActivity(intent);
     }
 
-
-    private void startSignUpActivity() {
-        Intent intent = new Intent(this, SignUpActivity.class);
+    private void myStartActivity(Class c, String id) {
+        Intent intent = new Intent(this, c);
+        intent.putExtra("id", id);
         startActivity(intent);
     }
+
+
 }
 
