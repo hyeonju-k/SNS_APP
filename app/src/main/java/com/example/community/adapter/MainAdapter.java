@@ -1,7 +1,7 @@
 package com.example.community.adapter;
 
 import android.app.Activity;
-import android.util.Log;
+import android.graphics.Color;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -25,7 +25,6 @@ import com.example.community.PostInfo;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 
-import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ import java.util.Locale;
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder> {
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
-    private FirebaseFirestore firebaseFirestore;
     private OnPostListener onPostListener;
 
     // Provide a reference to the views for each data item
@@ -54,8 +52,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     // Provide a suitable constructor (depends on the kind of dataset)
     public MainAdapter(Activity activity, ArrayList<PostInfo> myDataset) {
         this.activity = activity;
-        mDataset = myDataset;
-        firebaseFirestore = FirebaseFirestore.getInstance();
+        this.mDataset = myDataset;
     }
 
     public void setOnPostListener(OnPostListener onPostListener){
@@ -97,7 +94,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     @Override
     public void onBindViewHolder(@NonNull final MainViewHolder holder, int position) {
 
-
         CardView cardView = holder.cardView;
 
         // title
@@ -116,28 +112,33 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         if(contentsLayout.getTag() == null || !contentsLayout.getTag().equals(contentsList)){
             contentsLayout.setTag(contentsList);
             contentsLayout.removeAllViews();
-            if(contentsList.size() > 0){
-                for (int i = 0; i < contentsList.size(); i++) {
-                    String contents = contentsList.get(i);
-                    if (Patterns.WEB_URL.matcher(contents).matches()) {        // URL - image or video
-                        // 이미지
-                        ImageView imageView = new ImageView(activity);
-                        imageView.setLayoutParams(layoutParams);
-                        imageView.setAdjustViewBounds(true);
-                        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                        contentsLayout.addView(imageView);
-                        Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView);
-                    } else {          // text
-                        TextView textView = new TextView(activity);
-                        textView.setLayoutParams(layoutParams);
-                        textView.setText(contents);
-                        contentsLayout.addView(textView);
-                    }
+            final int More_INDEX = 2;
+            for (int i = 0; i < contentsList.size(); i++) {
+                if(i == More_INDEX){     // 2개를 초과할 때 더 보기
+                    TextView textView = new TextView(activity);
+                    textView.setLayoutParams(layoutParams);
+                    textView.setText("더 보기...");
+                    contentsLayout.addView(textView);
+                    break;
+                }
+                String contents = contentsList.get(i);
+                if (Patterns.WEB_URL.matcher(contents).matches() && contents.contains("https://firebasestorage.googleapis.com/v0/b/community-62fe7.appspot.com/o/posts")) {        // URL - image or video
+                    // 이미지
+                    ImageView imageView = new ImageView(activity);
+                    imageView.setLayoutParams(layoutParams);
+                    imageView.setAdjustViewBounds(true);
+                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                    contentsLayout.addView(imageView);
+                    Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView);
+                } else {          // text
+                    TextView textView = new TextView(activity);
+                    textView.setLayoutParams(layoutParams);
+                    textView.setText(contents);
+                    textView.setTextColor(Color.rgb(0,0,0));
+                    contentsLayout.addView(textView);
                 }
             }
         }
-
-
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         /*

@@ -106,6 +106,8 @@ public class WritePostActivity extends BasicActivity {
 
                     ImageView imageView = new ImageView(WritePostActivity.this);
                     imageView.setLayoutParams(layoutParams);
+                    imageView.setAdjustViewBounds(true);
+                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
                     imageView.setOnClickListener(new View.OnClickListener(){
                         @Override
                         public void onClick(View v){
